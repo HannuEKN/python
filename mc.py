@@ -72,7 +72,7 @@ atom={
 '=':'-...-', # sv.wikipedia - "separator"
 '+':'.-.-.', # AR-digraph "New Page Signal", sv.wikipedia - "the end"
 '-':'-....-',
-'_':'.--.-',
+# '_':'.--.-', same as 'å' below
 '"':'.-..-.',
 '$':'...-..-',# SX-digraph (Stock-eXchange)
 '@':'.--.-.', # AC-digraph
@@ -80,8 +80,8 @@ atom={
 
 # selected non-english / national additions. 
 
-'å':'.--.-', # à
-'ä':'.-.-',  # æ, ¸a
+chr(229):'.--.-', # à
+chr(228):'.-.-',  # ä, æ, ¸a
 'ć':'-.-..', # ĉ,ç
 'é':'..-..', # ȩ, -d
 'ð':'..--.', # Ð
@@ -89,7 +89,7 @@ atom={
 'ĵ':'.---.', #
 'ñ':'--.--', #
 'ĥ':'----',  # ch (gerke), š
-'ö':'---.',  # ó, ø
+chr(246):'---.',  # ö, ó, ø
 'ś':'...-...', # 
 'ŝ':'...-.', # also: "Understood"
 'þ':'.--..', # 
@@ -103,10 +103,12 @@ atom={
 '½':'...-.-', # SK-digraph "End of work",      sv.wikipedia - @, "end of transmission"
 '#':'.-..-',  # è, Ł, AU/RA?-digraph,          sv.wikipedia - #, "difference", used as separator before/after numbers
 '§':'-.-.-',  # NK?-digraph "Starting Signal", sv.wikipedia - "attention", before new transmission?
-'¼':'.-...',  # AS/RI?-digraph,                sv.wikipedia - "wait" (char: altGr-4 in Ubuntu)
+'¼':'.-...',  # AS/RI?-digraph,                sv.wikipedia - ~, "wait" (char: altGr-4 in Ubuntu)
 
 '':'' # accept empty string as input, return empty string
 }
+
+# more to look at -> https://sv.wikipedia.org/wiki/Specialtecken_i_morsealfabetet
 
 # build the "reverse" dict, for decoding morse into alphas
 mtoa={}
@@ -117,11 +119,11 @@ for a,m in atom.iteritems():
 def mEncode(s):
 	""" Create a string of . (dit) and - (dah) that represents morse code for the string parameter """
 	r=''
-	for c in str(s).lower():
+	for c in str(s).lower().decode('utf-8').encode('latin1'):
 		try:
 			r+=atom[c]+' '
 		except:
-			r+=' <def?> '
+			r+=' <def '+str(ord(c))+'> '
 	return r
 
 
@@ -137,7 +139,7 @@ def mDecode(s):
 			except: 
 				r+=' <def?> '
 		r+=' '
-	return r
+	return r.decode('latin1').encode('utf-8')
 
 
 if __name__ != "__main__":
@@ -148,10 +150,10 @@ else:
 	if len(s)==0 or s=='-h':
 		s=((sys.argv[0]).split('/'))[-1]
 		print('' \
-		'{} argument(s)\n' \
+		'{} <argument(s)>\n' \
 		'> Convert to/from morse-code.\n' \
 		'> Alphanumeric text arguments gets converted (encoded) to morse.\n' \
-		'> . (dit), - (dah) and space strings are decoded, note double space for delimiting words (you need to quote args!)'.format(s))
+		'> Strings of . (dit), - (dah) and space; gets decoded, use double space for delimiting words (you need to quote args!)'.format(s))
 	else:
 		if len(s.strip('.- '))>0:
 			# '--- text-> morse-code --- \n{}'.format(
